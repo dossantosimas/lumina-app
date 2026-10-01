@@ -31,7 +31,7 @@ Todos los requisitos son Must en este núcleo reducido. No se comprometen funcio
 | Gastos | Fecha, concepto, total; proveedor y referencia factura opcionales | REQ-002 / AC-002, AC-011 |
 | Factura completa | Un gasto sin exigir desglose de materiales | REQ-003 / AC-003 |
 | Clientes | Nombre obligatorio, contacto/notas opcionales; registro, consulta, búsqueda y edición | REQ-004 / AC-004 |
-| Acceso | Cuentas individuales iguales, privadas, sin registro público | REQ-005 / AC-005, AC-013 |
+| Acceso | Cuentas individuales iguales, datos compartidos y registro libre autorizado en LUM-21 | REQ-005 / AC-005, AC-013, AC-017 |
 | Varios dispositivos | Mismos datos persistidos al consultar desde otro dispositivo | REQ-006 / AC-006 |
 | Totales | Cantidad × precio final en COP, máximo dos decimales; total de pedido positivo | REQ-007 / AC-007 |
 | Archivo e historial | Archivo y restauración confirmados; relaciones e historial protegidos | REQ-008 / AC-008, AC-012, AC-014, AC-015 |

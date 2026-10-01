@@ -1,10 +1,10 @@
 # Project Status
 
-Current Phase: DELIVERY
+Current Phase: COMPLETE
 
-Current Milestone: LUM-21 registro libre autorizado; QA y revisión aprobados, publicación en curso.
+Current Milestone: LUM-21 registro libre publicado y verificado.
 
-Progress: LUM-01..16 DONE. Blueprint inicial aprobado2026-09-30 y ampliación aprobada2026-10-01. Entrega local; activación productiva fuera del alcance.
+Progress: LUM-01..21 DONE. Blueprint y ampliaciones aprobados; Vercel/Neon activos.
 
 Completed:
 - Acceso privado de dueños y primera cuenta local, clientes, pedidos multilínea y gastos COP; integridad, archivo/restauración, audit, concurrencia y reintentos.
@@ -17,13 +17,13 @@ Completed:
 - QA independiente, build, tipado, lint y restore aislado aprobados; documentación/entrega actualizadas.
 
 In Progress:
-- Publicación de /registro sin invitación ni aprobación, con acceso compartido para todas las cuentas.
+- Ninguno.
 
 Blocked:
 - Ninguno para LUM-21. No se transfieren cuentas ni datos locales; los usuarios crearán sus cuentas desde el registro productivo.
 
 Next:
-- Finalizar migración aditiva y publicación Vercel; verificar formulario y enlace productivos sin crear cuentas sintéticas en Neon.
+- Crear las cuentas reales desde https://lumina-app-sepia.vercel.app/registro y comenzar a registrar datos del negocio.
 
 Last Validation:
 - 2026-10-01: 37 unitarias,29 integración PostgreSQL/Auth PASS; typecheck/lint finales exit0; build optimizado Next PASS.
@@ -49,3 +49,6 @@ Last Validation:
 - 2026-10-01: Vercel Production Ready en56s, main9e95076, deployment EyDPNSfGAVsZJuqaHGnV7ZmeCD5L. URL https://lumina-app-sepia.vercel.app. Secrets runtime exclusivos Production; sin operador/migrador en Vercel. Smoke HTTPS sololectura PASS: login200, DENY/nosniff/HSTS, pantallas privadas y setup inicial redirigen login (Next streaming meta1s), session anonima null. No se ha probado login autenticado; cero cuentas productivas, autorizacion de copia de cuentas sigue pendiente.
 
 - Production registration extension tested/reviewed:37unit/30integration, typecheck/lint/build PASS, isolated browser1/1 PASS with responsive screenshots. Code/security APPROVE; private activation code in ignored production-registration-code.txt. Waiting explicit permission to store INITIAL_SETUP_TOKEN in VercelProduction and deploy. No account created or transferred in Neon.
+
+- LUM-21 final: 2026-10-01: Vercel Production Ready50s, deployment86gAgpBzw4cYdjfLqC6JrC3Anm91, main5126a55. /registro200 sin código; login Crear cuenta; HTTPS/cabeceras/guardas privadas/session anónima PASS10checks. Neon4migraciones, TLS y permisos restringidos PASS; cero cuentas comerciales creadas por QA. Registro/login reales del usuario pendientes de su uso, no de código.
+- Code/security independiente APPROVE; 37unit/35integration, E2E1 compuesto aislado, typecheck/lint/build PASS. Notas históricas de token/transferencia quedan sustituidas por registro libre autorizado.

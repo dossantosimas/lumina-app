@@ -190,3 +190,7 @@ El usuario aprobó implementar catálogo sin inventario, selección integrada de
 | REQ-012 | Pedidos/clientes/gastos/productos con jerarquía, filtros y navegación responsive legibles | Regresión critical y QA visual |
 | REQ-013 | Evolución tres series/colores, días/meses, ceros, negativos y tabla exacta que concuerda con KPIs | Integración y E2E, revisión analytics_reporter |
 | REQ-014 | Incorporar recurso existente Analytics Reporter con commit/licencia/trazabilidad y alcance descriptivo | INVENTORY/SOURCES y agents/analytics/analytics_reporter/SOURCE.md |
+
+## LUM-21 — Registro libre autorizado
+
+REQ-011 / AC-017: /registro permite crear varias cuentas sin invitación, código ni aprobación. Cada cuenta recibe acceso inmediato a todos los datos compartidos. Nombre, correo normalizado único, contraseña12..128 y confirmación; enlace permanente desde login. Validar origen canónico, payload estricto, límite persistente previo al hash, creación atómica y login real. Esta autorización sustituye la exclusión de registro público de los requisitos originales. Pruebas solo en bases locales aisladas.

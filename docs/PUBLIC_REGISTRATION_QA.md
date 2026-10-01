@@ -10,4 +10,4 @@ Validación 2026-10-01: typecheck y lint limpios; 37 unitarias y 35 integración
 
 Navegador Chromium en lumina_initial_setup_e2e aislada: primera cuenta local, cierre durable, enlace /registro, segunda cuenta sin código ni invitación, login y Resumen, dos dueños activos PASS. Formulario sin overflow en360/768/1280; capturas docs/qa-visual/registro-*.png. 1 escenario compuesto PASS, 4.7s de assertions; teardown Windows requirió cerrar solo servidor QA3002 identificado, limpieza de base completada. No se crearon cuentas sintéticas en lumina ni Neon.
 
-Publicación y smoke HTTPS: pendientes. No se reutilizan contraseñas de prueba ni se transfieren cuentas locales.
+2026-10-01: Vercel Production Ready50s, deployment86gAgpBzw4cYdjfLqC6JrC3Anm91, main5126a55. /registro200 sin código; login Crear cuenta; HTTPS/cabeceras/guardas privadas/session anónima PASS10checks. Neon4migraciones, TLS y permisos restringidos PASS; cero cuentas comerciales creadas por QA. Registro/login reales del usuario pendientes de su uso, no de código. No se reutilizan contraseñas de prueba ni se transfieren cuentas locales.
