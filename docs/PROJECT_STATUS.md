@@ -2,7 +2,7 @@
 
 Current Phase: DELIVERY
 
-Current Milestone: publicacion Vercel/Neon; despliegue Ready, acceso de duenos pendiente.
+Current Milestone: LUM-21 registro libre autorizado; QA y revisión aprobados, publicación en curso.
 
 Progress: LUM-01..16 DONE. Blueprint inicial aprobado2026-09-30 y ampliación aprobada2026-10-01. Entrega local; activación productiva fuera del alcance.
 
@@ -17,14 +17,13 @@ Completed:
 - QA independiente, build, tipado, lint y restore aislado aprobados; documentación/entrega actualizadas.
 
 In Progress:
-- Aprovisionamiento de cuentas productivas y comprobacion autenticada; consentimiento de transferencia de cuentas locales pendiente.
+- Publicación de /registro sin invitación ni aprobación, con acceso compartido para todas las cuentas.
 
 Blocked:
-- Ninguno para esta entrega. Producción futura requiere hosting/HTTPS, rotación de credencial Neon compartida, roles separados, validación PostgreSQL 18.6, costes y autorización; ver RUNBOOK/DELIVERY.
+- Ninguno para LUM-21. No se transfieren cuentas ni datos locales; los usuarios crearán sus cuentas desde el registro productivo.
 
 Next:
-- Registrar presentaciones reales en http://localhost:3000/productos/nuevo; seleccionar productos al crear pedidos. Catálogo no se infiere de histórico.
-- Uso con los dueños y nuevas observaciones de producto; producción futura segun RUNBOOK.
+- Finalizar migración aditiva y publicación Vercel; verificar formulario y enlace productivos sin crear cuentas sintéticas en Neon.
 
 Last Validation:
 - 2026-10-01: 37 unitarias,29 integración PostgreSQL/Auth PASS; typecheck/lint finales exit0; build optimizado Next PASS.

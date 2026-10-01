@@ -9,6 +9,7 @@ try {
  await client.query(`GRANT USAGE ON SCHEMA public TO "${runtimeRole}","${operatorRole}"`);
  await client.query(`GRANT EXECUTE ON FUNCTION public.lock_active_owner(text) TO "${runtimeRole}"`);
  await client.query(`GRANT EXECUTE ON FUNCTION public.initial_owner_available(),public.reserve_initial_owner_attempt(),public.create_initial_owner(text,text,text,text) TO "${runtimeRole}"`);
+ await client.query(`GRANT EXECUTE ON FUNCTION public.reserve_public_registration_attempt(),public.register_owner_account(text,text,text,text) TO "${runtimeRole}"`);
  await client.query(`GRANT SELECT,INSERT,UPDATE ON products,customers,sales_orders,expenses TO "${runtimeRole}"`);
  await client.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON sales_order_lines TO "${runtimeRole}"`);
  await client.query(`GRANT SELECT,INSERT ON audit_events TO "${runtimeRole}"`);

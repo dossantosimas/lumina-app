@@ -30,6 +30,20 @@ test('first owner is created from accessible local UI once, then logs in and set
   await expect(page).toHaveURL(/login\?cuenta=creada/);await expect(page.getByRole('status')).toContainText('Tu cuenta está lista');await expect(page.getByRole('link',{name:'Crear primera cuenta'})).toHaveCount(0);
   expect(Number((await database.query('SELECT count(*) n FROM public."user"')).rows[0].n)).toBe(1);
   await page.locator('input[name="email"]').fill(email);await page.locator('input[name="password"]').fill(password);await page.getByRole('button',{name:'Entrar',exact:true}).click();await expect(page).toHaveURL(/resumen/);await expect(page.getByRole('heading',{name:'Resumen',exact:true})).toBeVisible();
-  const anonymous=await browser.newContext();const other=await anonymous.newPage();await other.goto('/configuracion-inicial');await expect(other).toHaveURL(/login/);await expect(other.getByRole('link',{name:'Crear primera cuenta'})).toHaveCount(0);await anonymous.close();
+  const anonymous=await browser.newContext();const other=await anonymous.newPage();await other.goto('/configuracion-inicial');await expect(other).toHaveURL(/login/);await expect(other.getByRole('link',{name:'Crear primera cuenta'})).toHaveCount(0);
+  await other.getByRole('link',{name:'Crear cuenta',exact:true}).click();await expect(other).toHaveURL(/registro/);
+  await expect(other.getByRole('heading',{name:'Crear cuenta',exact:true})).toBeVisible();
+  await expect(other.locator('input[name="activationCode"]')).toHaveCount(0);
+  for(const width of [360,768,1280]){
+   await other.setViewportSize({width,height:900});expect(await other.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+   await other.screenshot({path:`docs/qa-visual/registro-${width}.png`,fullPage:true});
+  }
+  await other.locator('input[name="name"]').fill('Segunda dueña UI sintética');await other.locator('input[name="email"]').fill('second-ui-owner@example.test');
+  await other.locator('input[name="password"]').fill(password);await other.locator('input[name="passwordConfirmation"]').fill(password);
+  await other.getByRole('button',{name:'Crear mi cuenta',exact:true}).click();await expect(other).toHaveURL(/login\?cuenta=creada/);
+  await other.locator('input[name="email"]').fill('second-ui-owner@example.test');await other.locator('input[name="password"]').fill(password);
+  await other.getByRole('button',{name:'Entrar',exact:true}).click();await expect(other).toHaveURL(/resumen/);await expect(other.getByRole('heading',{name:'Resumen',exact:true})).toBeVisible();
+  expect(Number((await database.query('SELECT count(*) n FROM public."user" WHERE "activeAccess"=true')).rows[0].n)).toBe(2);
+  await anonymous.close();
  }finally{await database.end();}
 });

@@ -2,7 +2,9 @@
 
 Blueprint approved by user on 2026-09-30. Resume docs/PROJECT_STATUS.md and docs/TASKS.md; follow sibling ../codex-framework/framework/AGENTS.md and project-lifecycle.md. Do not edit framework or _sources.
 
-Scope: private owners-only COP app, multiline candle orders with optional product catalog references and free descriptions, clients, products and expenses. No inventory, payment tracking or attachments. Docker PostgreSQL local, Neon production; Neon connected and Vercel deployment authorized and active (2026-10-01).
+Scope: authenticated shared COP app, multiline candle orders with optional product catalog references and free descriptions, clients, products and expenses. No inventory, payment tracking or attachments. Docker PostgreSQL local, Neon production; Neon connected and Vercel deployment authorized and active (2026-10-01).
+
+User-authorized LUM-21 supersedes the invitation/first-owner-only admission policy: public /registro with no activation code, invitation or approval. Every registered account immediately gets activeAccess and all shared business data; user explicitly confirmed this consequence. Better Auth generic signup remains disabled; registration uses narrow SECURITY DEFINER functions, strict canonical origin, atomic credential creation and persistent pre-hash rate limiting. Never create synthetic production accounts. Test multiple owners only in isolated local databases.
 
 User-approved LUM-11: first owner may be created through /configuracion-inicial on the exact configured HTTP loopback origin, or the exact configured HTTPS origin with a server-only INITIAL_SETUP_TOKEN (64 lowercase hex characters) and matching activationCode. Production first-owner registration explicitly requested by user 2026-10-01. Durable database latch and triggers enforce one bootstrap winner and prevent reopening after revocation/deletion. Generic signup remains disabled. Runtime keeps narrow function EXECUTE and no generic user/account write privileges; never import operator credentials into web. Test bootstrap only in guarded isolated databases, never create synthetic owners in lumina.
 

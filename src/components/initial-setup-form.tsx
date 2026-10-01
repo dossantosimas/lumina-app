@@ -4,11 +4,12 @@ import { useRef, useState, useTransition, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createInitialOwner } from '@/server/initial-setup';
+import { registerAccount } from '@/server/registration';
 
 type Field = 'activationCode' | 'name' | 'email' | 'password' | 'passwordConfirmation';
 const fields: Field[] = ['activationCode', 'name', 'email', 'password', 'passwordConfirmation'];
 
-export function InitialSetupForm({requiresActivationCode=false}:{requiresActivationCode?:boolean}) {
+export function InitialSetupForm({requiresActivationCode=false,mode='initial'}:{requiresActivationCode?:boolean;mode?:'initial'|'public'}) {
     const router = useRouter();
     const submitting = useRef(false);
     const [busy, setBusy] = useState(false);
@@ -48,7 +49,7 @@ export function InitialSetupForm({requiresActivationCode=false}:{requiresActivat
         setBusy(true);
         startTransition(async () => {
             try {
-                const result = await createInitialOwner(input);
+                const result = await (mode==='public'?registerAccount(input):createInitialOwner(input));
                 if (result.ok) {
                     form.reset();
                     router.replace('/login?cuenta=creada');

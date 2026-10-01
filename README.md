@@ -6,7 +6,7 @@ Instala las dependencias fijadas con `npm.cmd ci`. La preparación completa est�
 
 ## Preparación local en Windows
 
-Necesitas Node.js 22.22.x, npm ≥10.9.4 y Docker Desktop con motor iniciado. No se instala ni modifica Docker automáticamente. PostgreSQL 17.11 corre en Docker; Neon está elegido para producción, todavía sin activación cloud.
+Necesitas Node.js 22.22.x, npm ≥10.9.4 y Docker Desktop con motor iniciado. PostgreSQL 17.11 corre en Docker; producción utiliza Neon y Vercel.
 
 Desde PowerShell:
 
@@ -33,7 +33,7 @@ Para crear otras cuentas autorizadas desde terminal interactiva:
 npm.cmd run auth:operator -- provision
 ```
 
-El operador pide verificar identidad, nombre/correo y contraseña oculta con confirmación. No pases contraseñas por argumentos. Abre [Lúmina local](http://localhost:3000) e inicia sesión con la cuenta provisionada. No hay registro público, cuenta predeterminada ni credenciales reales incluidas.
+El operador pide verificar identidad, nombre/correo y contraseña oculta con confirmación. No pases contraseñas por argumentos. También puedes crear tu cuenta sin invitación desde [Registro local](http://localhost:3000/registro) o [Registro en producción](https://lumina-app-sepia.vercel.app/registro). Todas las cuentas nuevas reciben acceso a los datos compartidos. No hay cuenta predeterminada ni credenciales reales incluidas.
 
 Si el launcher `npm.ps1` falla, usa `npm.cmd` como arriba. Si no está en PATH, invócalo con `& 'C:\Program Files\nodejs\npm.cmd'` y los mismos argumentos.
 

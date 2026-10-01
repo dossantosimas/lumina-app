@@ -20,5 +20,6 @@ export function LoginScreen({ initialSetupAvailable, accountCreated }: {
             <Link className="button primary" href="/configuracion-inicial">Crear primera cuenta</Link>
         </div>}
         <LoginForm onSuccess={() => { router.replace('/resumen'); router.refresh(); }}/>
+        <Link className="button" href="/registro">Crear cuenta</Link>
     </section></main>;
 }

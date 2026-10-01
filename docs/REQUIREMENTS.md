@@ -25,7 +25,7 @@ Todos son Must dentro de esta propuesta; no se incluyen mejoras opcionales en el
 | REQ-002 | Crear, consultar y editar gastos con fecha, concepto y total; proveedor y referencia de factura opcionales. | AC-002, AC-011 |
 | REQ-003 | Admitir el total de una factura completa como un gasto, sin desglose obligatorio. | AC-003 |
 | REQ-004 | Crear, consultar, buscar por nombre y editar clientes con nombre obligatorio, contacto y notas opcionales. | AC-004 |
-| REQ-005 | Acceso por cuentas individuales de dueños, permisos iguales, datos compartidos y sin registro público. | AC-005, AC-013 |
+| REQ-005 | Acceso por cuentas individuales, permisos iguales y datos compartidos. Registro público autorizado en LUM-21. | AC-005, AC-013, AC-017 |
 | REQ-006 | Consultar los datos persistidos desde cualquier dispositivo autorizado conectado. | AC-006 |
 | REQ-007 | Calcular totales exactos en COP por cantidad × precio unitario y suma de líneas. | AC-007 |
 | REQ-008 | Archivar y restaurar pedidos, gastos y clientes con confirmación, preservando referencias e historial. | AC-008, AC-012, AC-014, AC-015 |
@@ -123,7 +123,7 @@ Then el registro conserva sus datos y sigue incluido en los resúmenes correspon
 **AC-013 → REQ-005**
 Given una persona sin cuenta autorizada de Lúmina.
 When intenta consultar datos del negocio.
-Then recibe cero datos privados y no dispone de registro público para obtener acceso.
+Then recibe cero datos privados mientras no inicia sesión. Puede crear su cuenta en /registro para obtener acceso, conforme a la ampliación LUM-21.
 
 **AC-014 → REQ-008**
 Given un pedido activo tiene cambios anteriores conservados y un dueño solicita archivarlo.

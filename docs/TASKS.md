@@ -96,6 +96,7 @@ Cierre2026-10-01 LUM-12..16: todos DONE; reviews codigo/seguridad y UX APPROVE; 
 
 - LUM-17 — Neon: DONE. Tres migraciones, roles/ownership/grants, TLS y revisiones independientes PASS; credenciales en archivos ignorados.
 - LUM-18 — Vercel: DONE. Secrets Production y despliegue main9e95076 Ready; smoke anonimo HTTPS PASS. URL lumina-app-sepia.vercel.app.
-- LUM-19 — Acceso productivo: BLOCKED. Pendiente consentimiento especifico para copiar cuentas locales o datos del primer dueno para provision. Sin cuentas ni datos comerciales transferidos. Login autenticado/flujo operativo real pendientes; QA fixtures nunca en produccion.
+- LUM-19 — Acceso productivo: DONE. El usuario elige alta propia desde /registro en lugar de copiar cuentas locales. Sin cuentas ni datos comerciales transferidos; QA fixtures nunca en producción. Validación de credenciales reales a cargo del usuario.
 
-- LUM-20 — Primera cuenta en produccion: IN_PROGRESS. HTTPS canonical exacto y codigo de activacion privado, cierre durable despues de primera cuenta, sin signup generico ni nuevos permisosDB. Review code/security APPROVE; QAaislado y publicacion pendientes de cierre.
+- LUM-20 — Primera cuenta en producción: DONE. Implementación protegida validada; propuesta de activación exclusiva sustituida explícitamente por LUM-21 antes de publicación. No se guarda token en Vercel.
+- LUM-21 — Registro libre: REVIEW. Usuario confirma sin invitación y todas las cuentas con acceso a todo. /registro público canónico, enlace login, cuentas activas inmediatas, funciones restringidas/atómicas y límite persistente. Review independiente APPROVE; 37 unitarias/35 integración, lint/typecheck/build y navegador aislado dos cuentas PASS. Pendiente migración Neon, Vercel y smoke productivo.

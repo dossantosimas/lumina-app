@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 // Private bootstrap latch. Runtime has function EXECUTE only, no table privileges.
+model PublicRegistrationLimit {
+ id Boolean @id @default(true)
+ attemptWindow DateTime @default(now()) @map("attempt_window") @db.Timestamptz(6)
+ attempts Int @default(0)
+ @@map("public_registration_limit")
+}
 model InitialOwnerSetup {
  id Boolean @id @default(true)
  closed Boolean
