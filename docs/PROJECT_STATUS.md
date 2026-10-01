@@ -20,7 +20,7 @@ In Progress:
 - Ninguno en el alcance local aprobado.
 
 Blocked:
-- Ninguno para esta entrega. Producción futura requiere hosting/HTTPS, cuentas Neon, costes y autorización; ver RUNBOOK/DELIVERY.
+- Ninguno para esta entrega. Producción futura requiere hosting/HTTPS, rotación de credencial Neon compartida, roles separados, validación PostgreSQL 18.6, costes y autorización; ver RUNBOOK/DELIVERY.
 
 Next:
 - Registrar presentaciones reales en http://localhost:3000/productos/nuevo; seleccionar productos al crear pedidos. Catálogo no se infiere de histórico.
@@ -33,3 +33,8 @@ Last Validation:
 - Restore QA snapshot14productos/7pedidos/15lineas/6gastos: FKs/totales exactos, login real, consulta protegida de TODOS los registros y privilegios PASS7.922s. Nunca restaurado sobre lumina ni Neon.
 - Code/security y UX independientes APPROVE; evidencia IMPROVEMENTS_REVIEW.md, IMPROVEMENTS_UX_REVIEW.md e IMPROVEMENTS_QA.md.
 - Servidor final local3000 iniciado; servidores QA cerrados; datos/cuentas reales sin fixtures ni modificaciones de negocio.
+
+- 2026-10-01: conexión Neon directa/pooled verificada en solo lectura, TLS del cliente/certificado PASS, PostgreSQL18.6, public sin tablas. Credenciales en archivo ignorado; sin migraciones, transferencia de datos ni cambio del runtime local.
+
+- 2026-10-01: usuario selecciona Vercel. Preparación de build con generación Prisma y región iad1; guía/env/gate en RUNBOOK. Proyecto Vercel/URL, rotación/roles Neon y autorización productiva pendientes; sin deployment.
+- Preparacion Vercel: build:vercel (Prisma generate + Next/TypeScript) PASS, lint y diff check PASS; revision independiente cicd_expert APPROVE para configuracion/GitHub. No validacion cloud ni autorizacion de deployment.

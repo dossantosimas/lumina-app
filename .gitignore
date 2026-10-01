@@ -11,3 +11,4 @@ playwright-report/
 .runtime/
 src/generated/
 *.log
+.vercel/

@@ -95,7 +95,7 @@ La recuperación nativa de Neon depende del plan y restore window configurados; 
 
 ## Activación Neon y hosting
 
-No hay hosting Node elegido ni credenciales cloud recibidas. Después de autorización: PostgreSQL major17 en Neon, staging con datos exclusivamente sintéticos, prueba de migraciones/transacciones/locks/grants y adaptador antes de producción.
+Credenciales Neon recibidas el 2026-10-01 y guardadas exclusivamente en `.runtime/neon-admin.env` (ignorado), para uso administrativo. Conexiones directa y pooled comprobadas mediante consultas de solo lectura: PostgreSQL 18.6, sin tablas en public, TLS del cliente y certificado verificados con sslmode=verify-full. El indicador pg_stat_ssl pertenece al tramo interno del proxy Neon; no sustituye la comprobación TLS del cliente. Docker sigue siendo el entorno local. La credencial compartida debe rotarse antes de producción; nunca usar neondb_owner en el runtime web. Hosting seleccionado por el usuario: Vercel (2026-10-01); proyecto cloud y URL pendientes. Antes de activar: validar compatibilidad de PostgreSQL 18.6 en staging sintético, migraciones/transacciones/locks/grants y adaptador; preparar roles runtime/operador separados y obtener autorización de deployment.
 
 Runtime Node usa PrismaPg TCP y URL pooled Neon con hostname -pooler, rol restringido y TLS. Reutilizar pool por proceso y acotar conexiones. URL directa y credenciales de migrador/operador permanecen fuera del entorno web. No driver HTTP stateless ni estado/locks de sesión a través de pooling transaccional. Timeouts mediante rol/configuración transaccional compatible probada; nunca confiar SET de sesión persistente.
 
@@ -127,3 +127,27 @@ Migrar ambas bases locales y reaplicar grants después del cambio LUM-11; no reg
 ## Extensión catálogo — 2026-10-01
 
 Nueva migracion202610010005_products aplicada local/test: seguir db:migrate y db:grants al preparar cualquier entorno autorizado. products runtime SELECT/INSERT/UPDATE sinDELETE; operador cuentas no recibe permisos comerciales. Restore QA incluye productos/FK y prueba login/consulta de TODOS los pedidos/productos con conteos del snapshot original, incluidos archivados. CLI script nunca apunta a lumina/Neon para QA. Catálogo inicial real vacio, carga manual por dueños; no importación automatica de textos históricos. Despliegue productivo sigue sujeto a dependencias/autorización originales.
+
+
+## Preparación Vercel — 2026-10-01
+
+Configuración versionada en vercel.json: Next.js, npm ci, npm run build:vercel y región iad1 cercana a Neon us-east-1. El build genera Prisma Client (src/generated no se versiona) y compila; no aplica migraciones ni recibe credenciales administrativas. Configurar Node22.x en Vercel; engines exige al menos22.22.0 y menos23.
+
+Importar dossantosimas/lumina-app desde GitHub, directorio raíz y rama main. Antes de desplegar, preparar Neon con migrador/operador/runtime separados, migraciones y grants revisados; validar PostgreSQL18.6 en staging aislado. Mantener Docker local y datos existentes; no se ha autorizado transferencia de datos locales.
+
+Variables exclusivamente Production:
+
+| Variable | Valor a configurar |
+|---|---|
+| DATABASE_URL | URL pooled Neon con rol runtime restringido y sslmode=verify-full |
+| BETTER_AUTH_SECRET | Secreto aleatorio propio de producción de al menos32 caracteres |
+| BETTER_AUTH_URL | Origen HTTPS exacto asignado por Vercel o dominio propio, sin barra final |
+| APP_URL | El mismo origen HTTPS exacto |
+
+No configurar DIRECT_URL, DATABASE_URL_UNPOOLED, credenciales neondb_owner ni operador en Vercel; no prefijar secretos con NEXT_PUBLIC_. Preview no debe recibir la base productiva: requiere entorno y datos sintéticos independientes; si no existen, omitir Preview. Mantener proxy/IP conservador hasta revisión específica, login5/min compartido.
+
+Primer dueño productivo por CLI de operador usando archivo ignorado separado `.runtime/neon-operator.env`, con DIRECT_URL de operador y secreto/origen productivos; ejecutar `node --env-file=.runtime/neon-operator.env node_modules/tsx/dist/cli.mjs scripts/auth-operator.ts provision` en terminal interactiva. /configuracion-inicial permanece solo local; las cuentas Docker no aparecen automáticamente en Neon.
+
+Gate de publicación: rotar la credencial compartida, confirmar cuenta/proyecto Vercel y URL, entorno Neon validado/roles/copia recuperable, cuenta de dueño y autorización productiva. No se han aplicado migraciones ni publicado el sitio. Verificar después: HTTPS/login/logout/primer dueño, operación de pedidos/clientes/productos/gastos, filtros/resumen y ausencia de secretos en logs.
+
+Fuentes: https://vercel.com/docs/functions/runtimes/node-js/node-js-versions y https://vercel.com/kb/guide/nextjs-prisma-postgres.
