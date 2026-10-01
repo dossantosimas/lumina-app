@@ -90,3 +90,12 @@ Cierre LUM-11: INITIAL_SETUP_QA.md y INITIAL_SETUP_REVIEW.md, gates PASS y halla
 Plan canónico: IMPROVEMENTS_PLAN.md.
 
 Cierre2026-10-01 LUM-12..16: todos DONE; reviews codigo/seguridad y UX APPROVE; QA37/29 y25E2E distintos PASS (23completa+2acotados), tipos/lint/build PASS; restoreQA exacto incluyendo catalogo PASS. Evidencia IMPROVEMENTS_REVIEW/UX_REVIEW/QA y DELIVERY. No datos reales de negocio fabricados, Neon ni hosting activados.
+
+
+## Publicacion Vercel/Neon autorizada — 2026-10-01
+
+- LUM-17 — Neon: DONE. Tres migraciones, roles/ownership/grants, TLS y revisiones independientes PASS; credenciales en archivos ignorados.
+- LUM-18 — Vercel: DONE. Secrets Production y despliegue main9e95076 Ready; smoke anonimo HTTPS PASS. URL lumina-app-sepia.vercel.app.
+- LUM-19 — Acceso productivo: BLOCKED. Pendiente consentimiento especifico para copiar cuentas locales o datos del primer dueno para provision. Sin cuentas ni datos comerciales transferidos. Login autenticado/flujo operativo real pendientes; QA fixtures nunca en produccion.
+
+- LUM-20 — Primera cuenta en produccion: IN_PROGRESS. HTTPS canonical exacto y codigo de activacion privado, cierre durable despues de primera cuenta, sin signup generico ni nuevos permisosDB. Review code/security APPROVE; QAaislado y publicacion pendientes de cierre.

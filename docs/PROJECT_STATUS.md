@@ -1,8 +1,8 @@
 # Project Status
 
-Current Phase: COMPLETE
+Current Phase: DELIVERY
 
-Current Milestone: LUM-12..16 — mejoras aprobadas entregadas y validadas.
+Current Milestone: publicacion Vercel/Neon; despliegue Ready, acceso de duenos pendiente.
 
 Progress: LUM-01..16 DONE. Blueprint inicial aprobado2026-09-30 y ampliación aprobada2026-10-01. Entrega local; activación productiva fuera del alcance.
 
@@ -17,7 +17,7 @@ Completed:
 - QA independiente, build, tipado, lint y restore aislado aprobados; documentación/entrega actualizadas.
 
 In Progress:
-- Ninguno en el alcance local aprobado.
+- Aprovisionamiento de cuentas productivas y comprobacion autenticada; consentimiento de transferencia de cuentas locales pendiente.
 
 Blocked:
 - Ninguno para esta entrega. Producción futura requiere hosting/HTTPS, rotación de credencial Neon compartida, roles separados, validación PostgreSQL 18.6, costes y autorización; ver RUNBOOK/DELIVERY.
@@ -38,3 +38,15 @@ Last Validation:
 
 - 2026-10-01: usuario selecciona Vercel. Preparación de build con generación Prisma y región iad1; guía/env/gate en RUNBOOK. Proyecto Vercel/URL, rotación/roles Neon y autorización productiva pendientes; sin deployment.
 - Preparacion Vercel: build:vercel (Prisma generate + Next/TypeScript) PASS, lint y diff check PASS; revision independiente cicd_expert APPROVE para configuracion/GitHub. No validacion cloud ni autorizacion de deployment.
+
+- 2026-10-01: proyecto Vercel lumina-app confirmado en dossantosimas-projects; dominio lumina-app-sepia.vercel.app, sin deployment. Node22.x guardado; APP_URL y BETTER_AUTH_URL configuradas exclusivamente Production. Neon migraciones/roles, DATABASE_URL y BETTER_AUTH_SECRET pendientes. Esperando rotacion manual de credencial Neon y actualizacion del archivo ignorado.
+
+- 2026-10-01: usuario autoriza preparar Neon reutilizando passwords de roles locales. Scripts ignorados neon-prepare/neon-apply preparados; secreto de firma propio de produccion. Auto-review rechazo ejecucion por necesitar aprobacion precisa de creacion de roles, cambio de owner y revocacion de permisos PUBLIC en neondb. Ninguna mutacion remota ejecutada; pendiente aprobacion de alcance.
+
+- 2026-10-01: usuario aprueba explicitamente roles/cambio de ownership/revocacion PUBLIC y migraciones en neondb. Bootstrap y tres migraciones/grants completados; TLS pooled y privilegios runtime/operador/funciones verificados en solo lectura PASS. Revision independiente cicd_expert APPROVE. Datos comerciales y duenos en Neon: cero. Passwords de roles reutilizados de Docker por solicitud del usuario; firma Auth aleatoria propia de produccion. Secrets Vercel y primera cuenta/deployment siguen pendientes; no se transfirieron cuentas ni datos Docker.
+
+- 2026-10-01: usuario autoriza explicitamente DATABASE_URL runtime restringida y BETTER_AUTH_SECRET en Vercel Production y deployment. Ambas variables Secret guardadas exclusivamente Production. Despliegue main commit9e95076 iniciado, ID EyDPNSfGAVsZJuqaHGnV7ZmeCD5L; comprobacion Ready/HTTPS pendiente. Transferencia de cuentas locales sigue pendiente de consentimiento especifico.
+
+- 2026-10-01: Vercel Production Ready en56s, main9e95076, deployment EyDPNSfGAVsZJuqaHGnV7ZmeCD5L. URL https://lumina-app-sepia.vercel.app. Secrets runtime exclusivos Production; sin operador/migrador en Vercel. Smoke HTTPS sololectura PASS: login200, DENY/nosniff/HSTS, pantallas privadas y setup inicial redirigen login (Next streaming meta1s), session anonima null. No se ha probado login autenticado; cero cuentas productivas, autorizacion de copia de cuentas sigue pendiente.
+
+- Production registration extension tested/reviewed:37unit/30integration, typecheck/lint/build PASS, isolated browser1/1 PASS with responsive screenshots. Code/security APPROVE; private activation code in ignored production-registration-code.txt. Waiting explicit permission to store INITIAL_SETUP_TOKEN in VercelProduction and deploy. No account created or transferred in Neon.

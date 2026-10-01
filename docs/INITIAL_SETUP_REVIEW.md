@@ -34,3 +34,6 @@ Prueba integración leída: DB temporal aislada que rehúsa sobrescribir una exi
 - README/RUNBOOK describen la primera cuenta local, cierre permanente y CLI para cuentas posteriores. Allowlist y disableSignUp intactos; imports web usan solo db runtime y Better Auth crypto, sin instancia operador ni credenciales migrador.
 
 Revisión independiente final sobre la fuente corregida. No quedan Must fix/Should fix abiertos. Gate QA incorporado y cerrado; el orquestador puede actualizar estado y entrega. Una regresión o cambio de fuente posterior obliga a revisar el delta.
+
+
+Production bootstrap extension 2026-10-01: independent code_reviewer/security_auditor APPROVE (production_signup_review). Server-only INITIAL_SETUP_TOKEN64hex gates exactHTTPS origin; constant-time hashed comparison, strict payload, unchanged DB latch/rate/concurrency and generic signup disabled. No elevated runtime grant. Scope first owner only. Header valid path/invalid token tested without writes; fixture registration/login only isolatedDocker.

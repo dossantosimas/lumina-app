@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createInitialOwner } from '@/server/initial-setup';
 
-type Field = 'name' | 'email' | 'password' | 'passwordConfirmation';
-const fields: Field[] = ['name', 'email', 'password', 'passwordConfirmation'];
+type Field = 'activationCode' | 'name' | 'email' | 'password' | 'passwordConfirmation';
+const fields: Field[] = ['activationCode', 'name', 'email', 'password', 'passwordConfirmation'];
 
-export function InitialSetupForm() {
+export function InitialSetupForm({requiresActivationCode=false}:{requiresActivationCode?:boolean}) {
     const router = useRouter();
     const submitting = useRef(false);
     const [busy, setBusy] = useState(false);
@@ -28,8 +28,10 @@ export function InitialSetupForm() {
             email: String(values.get('email') ?? '').trim(),
             password: String(values.get('password') ?? ''),
             passwordConfirmation: String(values.get('passwordConfirmation') ?? ''),
+            ...(requiresActivationCode?{activationCode:String(values.get('activationCode')??'').trim()}:{}),
         };
         const nextErrors: Partial<Record<Field, string>> = {};
+        if(requiresActivationCode&&!/^[a-f0-9]{64}$/.test(input.activationCode??''))nextErrors.activationCode='Escribe el código de activación recibido.';
         if (!input.name || input.name.length > 120) nextErrors.name = 'Escribe tu nombre, hasta 120 caracteres.';
         if (!input.email || input.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)) nextErrors.email = 'Escribe un correo válido.';
         if (input.password.length < 12 || input.password.length > 128) nextErrors.password = 'Usa una contraseña de 12 a 128 caracteres.';
@@ -74,6 +76,7 @@ export function InitialSetupForm() {
     return <form onSubmit={submit} className="form-stack" noValidate aria-busy={busy}>
         {message && <p role="alert" className="notice error">{message}</p>}
         {!closed && <>
+            {requiresActivationCode&&<label>Código de activación<input name="activationCode" type="password" autoComplete="off" required maxLength={64} disabled={busy} aria-invalid={!!errors.activationCode} aria-describedby={errors.activationCode?'setup-activationCode-error':undefined}/>{error('activationCode')}</label>}
             <label>Nombre<input name="name" autoComplete="name" required maxLength={120} disabled={busy} aria-invalid={!!errors.name} aria-describedby={errors.name ? 'setup-name-error' : undefined}/>{error('name')}</label>
             <label>Correo<input name="email" type="email" autoComplete="username" required maxLength={254} disabled={busy} aria-invalid={!!errors.email} aria-describedby={errors.email ? 'setup-email-error' : undefined}/>{error('email')}</label>
             <label>Contraseña<input name="password" type={visible ? 'text' : 'password'} autoComplete="new-password" required minLength={12} maxLength={128} disabled={busy} aria-invalid={!!errors.password} aria-describedby={`setup-password-help${errors.password ? ' setup-password-error' : ''}`}/><small id="setup-password-help">Entre 12 y 128 caracteres.</small>{error('password')}</label>

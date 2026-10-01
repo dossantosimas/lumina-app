@@ -4,7 +4,7 @@ import {parse} from 'dotenv';
 import pg from 'pg';
 import {hashPassword} from 'better-auth/crypto';
 import {createDatabase} from '@/server/db';
-import {initialSetupAvailable,provisionInitialOwner,localSetupOrigin} from '@/server/initial-setup-service';
+import {initialSetupAvailable,provisionInitialOwner,localSetupOrigin,setupOrigin} from '@/server/initial-setup-service';
 import type {PrismaClient} from '@/generated/prisma/client';
 const request=vi.hoisted(()=>({value:new Headers({origin:'http://localhost:3001',host:'localhost:3001'})}));
 vi.mock('next/headers',()=>({headers:async()=>request.value}));
@@ -50,9 +50,32 @@ describe('first owner, isolated real PostgreSQL',()=>{
   expect((await provisionInitialOwner({...payload,passwordConfirmation:'DifferentPassword!'},'http://localhost:3001','http://localhost:3001',runtime)).code).toBe('INVALID');
   expect(await runtime.user.count()).toBe(0);
  });
+ it('production requires HTTPS, configured activation token, exact origin and valid activation code',async()=>{
+  const token='a'.repeat(64);
+  expect(setupOrigin('https://lumina.example',undefined)).toBeNull();
+  expect(setupOrigin('http://lumina.example',token)).toBeNull();
+  expect(setupOrigin('https://lumina.example/',token)).toBeNull();
+  expect(setupOrigin('https://lumina.example',token)).toBe('https://lumina.example');
+  vi.stubEnv('INITIAL_SETUP_TOKEN',token);
+  try{
+   expect((await provisionInitialOwner(payload,'https://lumina.example','https://lumina.example',runtime)).code).toBe('INVALID');
+   expect((await provisionInitialOwner({...payload,activationCode:'b'.repeat(64)},'https://lumina.example','https://lumina.example',runtime)).code).toBe('INVALID');
+   expect((await provisionInitialOwner({...payload,activationCode:token},'https://evil.example','https://lumina.example',runtime)).code).toBe('UNAVAILABLE');
+   vi.stubEnv('BETTER_AUTH_URL','https://lumina.example');
+   const badHeaders:Record<string,string>[]=[{host:'evil.example',origin:'https://lumina.example'},{host:'lumina.example',origin:'https://lumina.example','x-forwarded-host':'evil.example'},{host:'lumina.example',origin:'https://lumina.example','x-forwarded-proto':'http'}];
+   for(const fields of badHeaders){
+    request.value=new Headers(fields);expect((await createInitialOwner({...payload,activationCode:token})).code).toBe('UNAVAILABLE');
+   }
+   request.value=new Headers({host:'lumina.example',origin:'https://lumina.example','x-forwarded-host':'lumina.example','x-forwarded-proto':'https'});
+   expect((await createInitialOwner({...payload,activationCode:'b'.repeat(64)})).code).toBe('INVALID');
+   expect(await runtime.user.count()).toBe(0);
+  }finally{vi.unstubAllEnvs();request.value=new Headers({origin:'http://localhost:3001',host:'localhost:3001'});}
+ });
  it('exactly one simultaneous creator wins atomically with a Better Auth usable password; direct signup remains denied',async()=>{
   expect(await initialSetupAvailable(runtime)).toBe(true);
-  const result=await Promise.all([provisionInitialOwner(payload,'http://localhost:3001','http://localhost:3001',runtime),provisionInitialOwner({...payload,email:'second@example.test'},'http://localhost:3001','http://localhost:3001',runtime)]);
+  vi.stubEnv('INITIAL_SETUP_TOKEN','a'.repeat(64));
+  let result;
+  try{result=await Promise.all([provisionInitialOwner({...payload,activationCode:'a'.repeat(64)},'https://lumina.example','https://lumina.example',runtime),provisionInitialOwner({...payload,email:'second@example.test',activationCode:'a'.repeat(64)},'https://lumina.example','https://lumina.example',runtime)]);}finally{vi.unstubAllEnvs();}
   expect(result.filter(v=>v.ok)).toHaveLength(1);expect(await runtime.user.count()).toBe(1);expect(await runtime.account.count()).toBe(1);
   const owner=await runtime.user.findFirstOrThrow();expect(owner.activeAccess).toBe(true);
   // Same library options/adapter as web auth, restricted DB and official login API.
