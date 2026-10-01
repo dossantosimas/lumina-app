@@ -1,0 +1,69 @@
+{
+  "name": "lumina-app",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.22.0 <23",
+    "npm": ">=10.9.4"
+  },
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test",
+    "env:init": "node scripts/dev-env.mjs",
+    "db:up": "docker compose --env-file .runtime/docker.env up -d --wait",
+    "db:stop": "docker compose --env-file .runtime/docker.env stop",
+    "db:bootstrap": "node scripts/db-local.mjs",
+    "db:generate": "prisma generate",
+    "db:migrate": "node --env-file=.runtime/migrator.env node_modules/prisma/build/index.js migrate deploy",
+    "db:migrate:test": "node --env-file=.runtime/test-migrator.env node_modules/prisma/build/index.js migrate deploy",
+    "auth:operator": "node --env-file=.runtime/operator.env node_modules/tsx/dist/cli.mjs scripts/auth-operator.ts",
+    "db:grants": "node --env-file=.runtime/migrator.env node_modules/tsx/dist/cli.mjs scripts/grants.ts",
+    "db:grants:test": "node --env-file=.runtime/test-migrator.env node_modules/tsx/dist/cli.mjs scripts/grants.ts",
+    "qa:load": "node scripts/qa-load.mjs",
+    "qa:restore": "node scripts/qa-restore.mjs"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "better-auth": "1.7.6",
+    "dotenv": "18.0.4",
+    "next": "16.3.7",
+    "pg": "8.23.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.20.4",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "auth": "1.7.6",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.3.7",
+    "prisma": "7.10.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vite": "8.3.1",
+    "vitest": "5.0.3"
+  },
+  "allowScripts": {
+    "prisma@7.10.0": true,
+    "@prisma/engines@7.10.0": true,
+    "unrs-resolver@1.12.2": true,
+    "esbuild@0.28.2": true
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2",
+    "mysql2": "3.24.5"
+  },
+  "type": "module"
+}

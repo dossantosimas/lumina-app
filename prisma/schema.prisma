@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+}
+datasource db {
+  provider = "postgresql"
+}
+// Private bootstrap latch. Runtime has function EXECUTE only, no table privileges.
+model InitialOwnerSetup {
+ id Boolean @id @default(true)
+ closed Boolean
+ attemptWindow DateTime @default(now()) @map("attempt_window") @db.Timestamptz(6)
+ attempts Int @default(0)
+ @@map("initial_owner_setup")
+}
+model Product {
+ id String @id @default(uuid()) @db.Uuid
+ name String @db.VarChar(120)
+ price Decimal @db.Decimal(14,2)
+ description String? @db.VarChar(2000)
+ archivedAt DateTime? @db.Timestamptz(6)
+ version Int @default(1)
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
+ updatedAt DateTime @updatedAt @db.Timestamptz(6)
+ lines SalesOrderLine[]
+ @@index([archivedAt,name,id])
+ @@map("products")
+}
+model Customer {
+ id String @id @default(uuid()) @db.Uuid
+ name String @db.VarChar(120)
+ contact String? @db.VarChar(120)
+ notes String? @db.VarChar(2000)
+ archivedAt DateTime? @db.Timestamptz(6)
+ version Int @default(1)
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
+ updatedAt DateTime @updatedAt @db.Timestamptz(6)
+ orders SalesOrder[]
+ @@index([archivedAt,name,id])
+ @@map("customers")
+}
+model SalesOrder {
+ id String @id @default(uuid()) @db.Uuid
+ customerId String @db.Uuid
+ customer Customer @relation(fields:[customerId],references:[id],onDelete:Restrict)
+ customerNameSnapshot String @db.VarChar(120)
+ orderDate DateTime @db.Date
+ notes String? @db.VarChar(2000)
+ total Decimal @db.Decimal(14,2)
+ archivedAt DateTime? @db.Timestamptz(6)
+ version Int @default(1)
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
+ updatedAt DateTime @updatedAt @db.Timestamptz(6)
+ lines SalesOrderLine[]
+ @@index([archivedAt,orderDate,id])
+ @@index([customerId,orderDate,id])
+ @@map("sales_orders")
+}
+model SalesOrderLine {
+ id String @id @default(uuid()) @db.Uuid
+ orderId String @db.Uuid
+ order SalesOrder @relation(fields:[orderId],references:[id],onDelete:Restrict)
+ productId String? @db.Uuid
+ product Product? @relation(fields:[productId],references:[id],onDelete:Restrict)
+ position Int
+ description String @db.VarChar(200)
+ quantity Int
+ unitPrice Decimal @db.Decimal(14,2)
+ @@unique([orderId,position])
+ @@index([productId])
+ @@map("sales_order_lines")
+}
+model Expense {
+ id String @id @default(uuid()) @db.Uuid
+ expenseDate DateTime @db.Date
+ concept String @db.VarChar(300)
+ amount Decimal @db.Decimal(14,2)
+ supplier String? @db.VarChar(120)
+ invoiceReference String? @db.VarChar(120)
+ archivedAt DateTime? @db.Timestamptz(6)
+ version Int @default(1)
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
+ updatedAt DateTime @updatedAt @db.Timestamptz(6)
+ @@index([archivedAt,expenseDate,id])
+ @@map("expenses")
+}
+model AuditEvent {
+ id String @id @default(uuid()) @db.Uuid
+ actorId String
+ actor User @relation(fields:[actorId],references:[id],onDelete:Restrict)
+ actorNameSnapshot String
+ occurredAt DateTime @default(now()) @db.Timestamptz(6)
+ entityType String
+ entityId String @db.Uuid
+ action String
+ before Json?
+ after Json
+ resultingVersion Int
+ @@index([entityType,entityId,occurredAt,id])
+ @@map("audit_events")
+}
+model IdempotencyRecord {
+ id String @id @default(uuid()) @db.Uuid
+ ownerId String
+ owner User @relation(fields:[ownerId],references:[id],onDelete:Restrict)
+ scope String
+ requestKey String @db.Uuid
+ payloadHash String @db.Char(64)
+ response Json
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
+ @@unique([ownerId,scope,requestKey])
+ @@map("idempotency_records")
+}
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  activeAccess  Boolean   @default(false)
+  sessions      Session[]
+  audits AuditEvent[]
+  idempotencyRecords IdempotencyRecord[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model RateLimit {
+  id          String @id
+  key         String
+  count       Int
+  lastRequest BigInt
+
+  @@unique([key])
+  @@map("rateLimit")
+}
+

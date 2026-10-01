@@ -1,0 +1,37 @@
+import {spawnSync} from 'node:child_process';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {parse} from 'dotenv';
+const env=parse(readFileSync('.runtime/test.env'));
+const url=new URL(env.DATABASE_URL??'');
+if(url.pathname!=='/lumina_test'||url.hostname!=='127.0.0.1')throw new Error('Restore QA requires isolated local lumina_test');
+const target='lumina_restore_test';
+const started=Date.now();
+function authProof(mode,counts){const r=spawnSync(process.execPath,['--conditions=react-server','--import','tsx','tests/support/restore-auth.ts',mode],{env:{...process.env,...(counts?{QA_RESTORE_ORDER_COUNT:String(counts.orders),QA_RESTORE_PRODUCT_COUNT:String(counts.products)}:{})},maxBuffer:1024*1024});if(r.status!==0)throw new Error(`Restore auth ${mode} failed; secrets withheld`);}
+authProof('--prepare');
+const base=['compose','--env-file','.runtime/docker.env','exec','-T','postgres'];
+function docker(args,input){const r=spawnSync('docker',[...base,...args],{input,maxBuffer:64*1024*1024});if(r.status!==0)throw new Error('Isolated restore command failed; secrets and database content withheld');return r.stdout;}
+const query=`SELECT json_build_object('products',(SELECT count(*) FROM products),'customers',(SELECT count(*) FROM customers),'orders',(SELECT count(*) FROM sales_orders),'lines',(SELECT count(*) FROM sales_order_lines),'expenses',(SELECT count(*) FROM expenses),'audit',(SELECT count(*) FROM audit_events),'idempotency',(SELECT count(*) FROM idempotency_records),'brokenRefs',(SELECT count(*) FROM sales_orders o LEFT JOIN customers c ON o."customerId"=c.id WHERE c.id IS NULL),'brokenProductRefs',(SELECT count(*) FROM sales_order_lines l LEFT JOIN products p ON l."productId"=p.id WHERE l."productId" IS NOT NULL AND p.id IS NULL),'wrongTotals',(SELECT count(*) FROM sales_orders o WHERE o.total<>(SELECT sum(quantity*"unitPrice") FROM sales_order_lines l WHERE l."orderId"=o.id)),'activeOwners',(SELECT count(*) FROM "user" WHERE "activeAccess"));`;
+const inspect=db=>JSON.parse(docker(['psql','-U','postgres','-d',db,'-At','-c',query]).toString().trim());
+const before=inspect('lumina_test');
+if(before.orders<1||before.customers<1||before.activeOwners<1)throw new Error('Restore proof requires nonempty synthetic QA fixtures');
+// pg_dump/restore run inside the local PostgreSQL container via its Unix socket.
+// No credentials in process arguments, logs, or output. Dump remains in memory.
+const dump=docker(['pg_dump','-U','postgres','-d','lumina_test','-Fc','--no-owner','--no-acl']);
+docker(['createdb','-U','postgres',target]);
+try{
+ docker(['pg_restore','-U','postgres','-d',target,'--no-owner','--no-acl','--exit-on-error'],dump);
+ const after=inspect(target);if(JSON.stringify(before)!==JSON.stringify(after)||after.brokenRefs!==0||after.brokenProductRefs!==0||after.wrongTotals!==0)throw new Error('Restored counts/references/totals mismatch');
+ docker(['psql','-U','postgres','-d',target,'-v','ON_ERROR_STOP=1','-c',`REVOKE ALL ON DATABASE ${target} FROM PUBLIC; GRANT CONNECT ON DATABASE ${target} TO lumina_test_app,lumina_test_operator,lumina_test_migrator; ALTER SCHEMA public OWNER TO lumina_test_migrator; REVOKE ALL ON SCHEMA public FROM PUBLIC; DO $$ DECLARE t record; BEGIN FOR t IN SELECT tablename FROM pg_tables WHERE schemaname='public' LOOP EXECUTE format('ALTER TABLE public.%I OWNER TO lumina_test_migrator',t.tablename); END LOOP; END $$; DO $$ DECLARE f record; BEGIN FOR f IN SELECT p.oid::regprocedure AS signature FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname IN ('lock_active_owner','close_initial_owner_setup','initial_owner_available','reserve_initial_owner_attempt','create_initial_owner') LOOP EXECUTE format('ALTER FUNCTION %s OWNER TO lumina_test_migrator',f.signature); EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC',f.signature); END LOOP; END $$;`]);
+ const migrationEnv=parse(readFileSync('.runtime/test-migrator.env'));const restoredUrl=new URL(migrationEnv.DIRECT_URL??migrationEnv.DATABASE_URL);restoredUrl.pathname=`/${target}`;
+ const grants=spawnSync(process.execPath,['--import','tsx','scripts/grants.ts'],{env:{...process.env,DIRECT_URL:restoredUrl.href,APP_DB_ROLE:'lumina_test_app',OPERATOR_DB_ROLE:'lumina_test_operator'},maxBuffer:1024*1024});if(grants.status!==0)throw new Error('Restored exact least-privilege grants failed; secrets withheld');
+ const privileges=docker(['psql','-U','postgres','-d',target,'-At','-c',`SELECT has_table_privilege('lumina_test_app','audit_events','SELECT') AND NOT has_table_privilege('lumina_test_app','audit_events','UPDATE') AND NOT has_table_privilege('lumina_test_app','audit_events','DELETE') AND NOT has_table_privilege('lumina_test_app','audit_events','TRUNCATE');`]).toString().trim();
+ if(privileges!=='t')throw new Error('Restored audit role boundaries invalid');
+ const restricted=docker(['psql','-U','postgres','-d',target,'-At','-c',`SELECT NOT has_table_privilege('lumina_test_app','"user"','UPDATE') AND NOT has_table_privilege('lumina_test_app','account','INSERT') AND NOT has_table_privilege('lumina_test_app','sales_orders','DELETE') AND has_table_privilege('lumina_test_app','products','SELECT') AND has_table_privilege('lumina_test_app','products','INSERT') AND has_table_privilege('lumina_test_app','products','UPDATE') AND NOT has_table_privilege('lumina_test_app','products','DELETE') AND NOT has_table_privilege('lumina_test_operator','products','INSERT') AND NOT EXISTS (SELECT 1 FROM pg_proc p CROSS JOIN LATERAL aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a WHERE p.proname IN ('lock_active_owner','close_initial_owner_setup','initial_owner_available','reserve_initial_owner_attempt','create_initial_owner') AND a.grantee=0 AND a.privilege_type='EXECUTE');`]).toString().trim();
+ if(restricted!=='t')throw new Error('Restored auth/business/function privilege boundary invalid');
+ const setupClosed=docker(['psql','-U','postgres','-d',target,'-At','-c',`SELECT (SELECT closed FROM public.initial_owner_setup WHERE id=true) AND NOT public.initial_owner_available() AND NOT has_table_privilege('lumina_test_app','public.initial_owner_setup','SELECT') AND NOT has_table_privilege('lumina_test_app','public.initial_owner_setup','UPDATE') AND NOT has_table_privilege('lumina_test_operator','public.initial_owner_setup','UPDATE') AND (SELECT count(*)=5 AND bool_and(pg_get_userbyid(p.proowner)='lumina_test_migrator') FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname IN ('lock_active_owner','close_initial_owner_setup','initial_owner_available','reserve_initial_owner_attempt','create_initial_owner'));`]).toString().trim();
+ if(setupClosed!=='t')throw new Error('Restored initial setup latch or function ownership invalid');
+ authProof('--verify',before);
+ mkdirSync('.runtime',{recursive:true});writeFileSync('.runtime/qa-restore-result.json',JSON.stringify({at:new Date().toISOString(),source:'lumina_test',target,counts:after,isolatedRestore:true,auditPrivileges:true,authAndBusinessLeastPrivilege:true,functionPublicExecute:false,initialSetupClosed:true,functionOwnershipMigrator:true,restoredLoginAndQuery:true,durationMs:Date.now()-started},null,2));
+ console.log('Isolated PostgreSQL backup restoration verified: counts, FKs, exact totals, history, owner admission and audit grants. Evidence: .runtime/qa-restore-result.json');
+}finally{docker(['dropdb','-U','postgres',target]);}
+
